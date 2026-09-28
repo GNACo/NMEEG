@@ -1,0 +1,110 @@
+% ─────────────────────────────────────────────────────────────────────────────
+% Required packages (add to preamble):
+%   \usepackage{booktabs}
+%   \usepackage[table]{xcolor}   % for \rowcolor
+%   \usepackage{multirow}
+% ─────────────────────────────────────────────────────────────────────────────
+
+\begin{table*}[ht]
+\centering
+\caption{%
+  Binary classification performance using EEG z-score deviations from the
+  normative model as features.
+  Results obtained via stratified 5-fold cross-validation with in-fold random
+  under-sampling to address class imbalance, and 100-iteration bootstrap
+  out-of-bag (OOB) resampling for AUC stability estimation.
+  Healthy controls (HC) were partitioned into a single global 80/20 train–test
+  split (stratified by age), ensuring the same $n = 130$ held-out subjects
+  served as the reference class across all features.
+  Features: oscillatory relative spectral power (specparam decomposition)
+  across 7 frequency bands $\times$ 5 scalp ROIs
+  (Frontal, Central, Parietal, Occipital, Parieto-Occipital).
+  \textbf{Bold}: best result per metric within each comparison group.
+  Shaded rows indicate the best overall classifier per comparison (highest CV AUC).%
+}
+\label{tab:classification_results}
+\setlength{\tabcolsep}{7pt}
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+\textbf{Model}
+  & \textbf{CV AUC} (mean $\pm$ SD)
+  & \textbf{Accuracy}
+  & \textbf{F1}
+  & \textbf{Brier}
+  & \textbf{Boot AUC} (mean $\pm$ SD) \\
+\midrule
+
+%% ── HC vs MCI ─────────────────────────────────────────────────────────────
+\multicolumn{6}{@{}l}{%
+  \textit{HC vs MCI}\enspace
+  \small($n_\text{HC} = 130$,\; $n_\text{MCI} = 314$)} \\[3pt]
+\rowcolor{gray!12}
+SVM
+  & $\mathbf{0.863 \pm 0.034}$ & $\mathbf{0.802}$ & $\mathbf{0.768}$ & 0.151
+  & $\mathbf{0.849 \pm 0.027}$ \\
+Logistic Regression
+  & $0.857 \pm 0.046$ & 0.766 & 0.737 & $\mathbf{0.149}$
+  & $0.844 \pm 0.029$ \\
+Random Forest
+  & $0.716 \pm 0.074$ & 0.624 & 0.605 & 0.216
+  & $0.725 \pm 0.038$ \\
+Decision Tree
+  & $0.592 \pm 0.034$ & 0.579 & 0.559 & 0.421
+  & $0.604 \pm 0.036$ \\
+
+\midrule
+
+%% ── HC vs AD ──────────────────────────────────────────────────────────────
+\multicolumn{6}{@{}l}{%
+  \textit{HC vs AD}\enspace
+  \small($n_\text{HC} = 130$,\; $n_\text{AD} = 130$)} \\[3pt]
+\rowcolor{gray!12}
+SVM
+  & $\mathbf{0.905 \pm 0.032}$ & $\mathbf{0.835}$ & $\mathbf{0.834}$ & 0.132
+  & $\mathbf{0.890 \pm 0.025}$ \\
+Logistic Regression
+  & $0.897 \pm 0.017$ & $\mathbf{0.835}$ & $\mathbf{0.834}$ & $\mathbf{0.128}$
+  & $0.887 \pm 0.028$ \\
+Random Forest
+  & $0.805 \pm 0.052$ & 0.719 & 0.716 & 0.180
+  & $0.789 \pm 0.031$ \\
+Decision Tree
+  & $0.673 \pm 0.042$ & 0.673 & 0.672 & 0.327
+  & $0.666 \pm 0.050$ \\
+
+\midrule
+
+%% ── HC vs ACr ─────────────────────────────────────────────────────────────
+\multicolumn{6}{@{}l}{%
+  \textit{HC vs ACr (\textit{PSEN1} E280A)}\enspace
+  \small($n_\text{HC} = 130$,\; $n_\text{ACr} = 39$)} \\[3pt]
+SVM
+  & $0.722 \pm 0.068$ & $\mathbf{0.668}$ & $\mathbf{0.616}$ & $\mathbf{0.219}$
+  & $0.685 \pm 0.065$ \\
+\rowcolor{gray!12}
+Logistic Regression
+  & $\mathbf{0.739 \pm 0.062}$ & 0.645 & 0.596 & 0.238
+  & $\mathbf{0.711 \pm 0.066}$ \\
+Random Forest
+  & $0.702 \pm 0.071$ & 0.651 & 0.612 & 0.222
+  & $0.705 \pm 0.074$ \\
+Decision Tree
+  & $0.585 \pm 0.084$ & 0.610 & 0.553 & 0.390
+  & $0.563 \pm 0.074$ \\
+
+\bottomrule
+\end{tabular}
+\par\smallskip
+\raggedright\small
+\textbf{Abbreviations:}
+AUC: area under the ROC curve;
+Brier: probabilistic calibration loss (lower is better);
+Boot AUC: out-of-bag AUC across 100 bootstrap iterations;
+F1: macro-averaged F1 score;
+SVM: calibrated linear support vector machine (Platt scaling);
+HC: healthy controls (global held-out 20\% test split);
+MCI: mild cognitive impairment;
+AD: Alzheimer's disease;
+ACr: asymptomatic \textit{PSEN1} E280A mutation carriers.
+\end{table*}

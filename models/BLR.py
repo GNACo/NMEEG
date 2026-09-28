@@ -365,60 +365,155 @@ class BayesianLinearRegression:
 
     def get_variance_decomposition(self, x_star: np.ndarray, Xv_test: np.ndarray = None):
         """
-        Devuelve la varianza total, aleatoric y epistemic para cada punto de test.
-        Si se proporciona Xv_test y w_d, calcula varianza aleatoric heterocedástica.
+        Computes predictive uncertainty decomposition for a set of input points.
+
+        This function returns the total predictive variance as the sum of:
+            - Epistemic uncertainty: model uncertainty due to limited data
+            - Aleatoric uncertainty: noise inherent to the data (homoscedastic or heteroscedastic)
+
+        IMPORTANT:
+            All variances are returned in the *normalized target space* (i.e., after z-scoring y).
+            To convert them back to the original scale, multiply by (self.y_std ** 2).
+
+        Parameters
+        ----------
+        x_star : np.ndarray, shape (N, D)
+            Test input features (same format as training inputs before standardization).
+
+        Xv_test : np.ndarray, optional, shape (N, Dv)
+            Covariates used for modeling heteroscedastic noise (e.g., age, sex).
+            Required if the model was trained in heteroscedastic mode.
+
+        Returns
+        -------
+        total_var : np.ndarray, shape (N,)
+            Total predictive variance = epistemic_var + aleatoric_var
+
+        aleatoric_var : np.ndarray, shape (N,)
+            Data noise variance:
+                - Constant (sigma²) if homoscedastic
+                - Input-dependent if heteroscedastic
+
+        epistemic_var : np.ndarray, shape (N,)
+            Model uncertainty derived from posterior weight covariance (V_n)
+
+        Notes
+        -----
+        Epistemic uncertainty is computed as:
+            diag(phi(x*) @ V_n @ phi(x*)^T)
+
+        Aleatoric uncertainty:
+            - Homoscedastic: sigma²
+            - Heteroscedastic: exp(-Xv_test @ w_d)
+
+        The function does NOT rescale outputs back to the original y space.
+        That must be done externally if needed.
+
+        Common pitfall:
+            Do NOT confuse variance with standard deviation when using this output.
         """
-        # Estandarizar x_star
+
+        # Standardize input using training statistics
         x_star_standardized = (x_star - self.x_mean) / self.x_std
         phi_star = self.create_design_matrix(x_star_standardized)
 
-        # Predicción puntual
-        mean_pred = phi_star @ self.m
-
-        # Epistemic: incertidumbre del modelo
+        # Epistemic uncertainty (model uncertainty)
         epistemic_var = np.sum(phi_star @ self.V_n * phi_star, axis=1)
 
-        # Aleatoric: si hay covariables, usar w_d para estimarla
+        # Aleatoric uncertainty (data noise)
         if self.heteroscedastic:
             if self.w_d is None or Xv_test is None:
                 raise ValueError("Missing covariates (Xv_test) or weights (w_d) in heteroscedastic mode.")
+
             Xv_test = np.array(Xv_test)
             if Xv_test.ndim == 1:
                 Xv_test = Xv_test[:, np.newaxis]
+
+            # Scale covariates
             Xv_test_scaled = (Xv_test - self.Xv_mean) / self.Xv_std
+
+            # Linear model for log-precision (clipped for numerical stability)
             z = np.clip(Xv_test_scaled @ self.w_d, -10, 10)
+
+            # Convert precision → variance
             aleatoric_var = 1.0 / np.exp(z)
+
         else:
+            # Constant noise
             aleatoric_var = self.sigma2 * np.ones_like(epistemic_var)
 
-
+        # Total predictive variance
         total_var = epistemic_var + aleatoric_var
 
         return total_var, aleatoric_var, epistemic_var
 
     
+    def predict_centiles(self, x_star: np.ndarray, Xv_test: np.ndarray = None,
+                     percentiles=[1, 5, 25, 50, 75, 95, 99]):
+        total_var, _, _ = self.get_variance_decomposition(x_star, Xv_test=Xv_test)
+
+        total_var = np.maximum(total_var, 1e-12)
+
+        mu_std = self.median_prediction(x_star)
+        sigma_std = np.sqrt(total_var)
+
+        centiles = {}
+        for p in percentiles:
+            z = norm.ppf(p / 100)
+            q_std = mu_std + z * sigma_std
+            q_orig = q_std * self.y_std + self.y_mean
+            centiles[p] = q_orig
+
+        return centiles
+
     def predict_centile_bands(self, x_star: np.ndarray, Xv_test: np.ndarray = None,
-                          percentiles=[1, 5, 25, 75, 95, 99], factor=0.5):
-        total_var, aleatoric_var, epistemic_var = self.get_variance_decomposition(x_star, Xv_test=Xv_test)
+                          percentiles=[1, 5, 25, 50, 75, 95, 99], factor=0.5):
+        total_var, _, epistemic_var = self.get_variance_decomposition(x_star, Xv_test=Xv_test)
 
-        # Escalar a la varianza original
-        total_var *= self.y_std ** 2
-        epistemic_var *= self.y_std ** 2
+        total_var = np.maximum(total_var, 1e-12)
+        epistemic_var = np.maximum(epistemic_var, 1e-12)
 
-        s2_lower = total_var - factor * epistemic_var
-        s2_upper = total_var + factor * epistemic_var
+        mu_std = self.median_prediction(x_star)
 
-        # Escalar la predicción mediana también
-        median = self.median_prediction(x_star) * self.y_std + self.y_mean
+        s2_lower = np.maximum(total_var - factor * epistemic_var, 1e-12)
+        s2_upper = np.maximum(total_var + factor * epistemic_var, 1e-12)
 
         bounds = {}
         for p in percentiles:
             z = norm.ppf(p / 100)
-            lower = median + z * np.sqrt(total_var)
-            upper = median + z * np.sqrt(total_var)
-            bounds[p] = (lower, upper)
+
+            q_lower_std = mu_std + z * np.sqrt(s2_lower)
+            q_upper_std = mu_std + z * np.sqrt(s2_upper)
+
+            q_lower = q_lower_std * self.y_std + self.y_mean
+            q_upper = q_upper_std * self.y_std + self.y_mean
+
+            bounds[p] = (q_lower, q_upper)
 
         return bounds
+
+    # def predict_centile_bands(self, x_star: np.ndarray, Xv_test: np.ndarray = None,
+    #                       percentiles=[1, 5, 25, 75, 95, 99], factor=0.5):
+    #     total_var, aleatoric_var, epistemic_var = self.get_variance_decomposition(x_star, Xv_test=Xv_test)
+
+    #     # Escalar a la varianza original
+    #     total_var *= self.y_std ** 2
+    #     epistemic_var *= self.y_std ** 2
+
+    #     s2_lower = total_var - factor * epistemic_var
+    #     s2_upper = total_var + factor * epistemic_var
+
+    #     # Escalar la predicción mediana también
+    #     median = self.median_prediction(x_star) * self.y_std + self.y_mean
+
+    #     bounds = {}
+    #     for p in percentiles:
+    #         z = norm.ppf(p / 100)
+    #         lower = median + z * np.sqrt(total_var)
+    #         upper = median + z - np.sqrt(total_var)
+    #         bounds[p] = (lower, upper)
+
+    #     return bounds
 
 
     def median_prediction(self, x_star: np.ndarray):
