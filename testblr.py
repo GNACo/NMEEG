@@ -113,8 +113,11 @@ def compute_BLR_and_save_outputs(df, feature, covset, bases, length_scale, sigma
 
     if hc_train_ids is not None and hc_test_ids is not None:
         # Split global: usar IDs pre-computados (mismo conjunto para todos los features)
-        hc_train = hc[hc['subject'].isin(hc_train_ids)].copy()
-        hc_test  = hc[hc['subject'].isin(hc_test_ids)].copy()
+        # Se matchea por (subject, SITE) porque el mismo 'subject' se reutiliza
+        # en sitios distintos (ver nota en el split global de HC).
+        hc_uid = hc['subject'].astype(str) + '||' + hc['SITE'].astype(str)
+        hc_train = hc[hc_uid.isin(hc_train_ids)].copy()
+        hc_test  = hc[hc_uid.isin(hc_test_ids)].copy()
     else:
         # Fallback: split independiente por feature (comportamiento original)
         num_bins = 5
@@ -559,9 +562,15 @@ _hc_records = []
 for _roi in rois:
     _p = fr"{_base_feat_path}\{_file_name_ref}{_roi}_SITE_age_group_recombat.xlsx"
     _d = pd.read_excel(_p, sheet_name="harmonizeSITE_age_group")
-    _hc_records.append(_d[_d['group'] == 'HC'][['subject', 'age']].dropna())
+    _hc_records.append(_d[_d['group'] == 'HC'][['subject', 'SITE', 'age']].dropna())
 
-_hc_global = pd.concat(_hc_records).drop_duplicates(subset='subject').reset_index(drop=True)
+# NOTE: 'subject' IDs are simple per-site sequential codes (sub-001, sub-002, ...)
+# and are reused independently across sites (e.g. Dortmund and Oslo both have a
+# "sub-001"). Deduplicating on 'subject' alone silently merges different real
+# people who happen to share an ID string, so we dedup on (subject, SITE).
+_hc_global = pd.concat(_hc_records).reset_index(drop=True)
+_hc_global['uid'] = _hc_global['subject'].astype(str) + '||' + _hc_global['SITE'].astype(str)
+_hc_global = _hc_global.drop_duplicates(subset='uid').reset_index(drop=True)
 
 # Rango de edad del MCI (Seoul + Madrid) para filtrar el test set
 _p_ref = fr"{_base_feat_path}\{_file_name_ref}{rois[0]}_SITE_age_group_recombat.xlsx"
@@ -573,14 +582,14 @@ _age_bins_global = pd.qcut(_hc_global['age'], q=5, labels=False, duplicates='dro
 _splitter_global = StratifiedShuffleSplit(n_splits=1, test_size=0.2, random_state=42)
 _tr_idx, _te_idx = next(_splitter_global.split(_hc_global, _age_bins_global))
 
-_hc_train_ids = set(_hc_global.iloc[_tr_idx]['subject'].tolist())
-_hc_test_ids_all = set(_hc_global.iloc[_te_idx]['subject'].tolist())
+_hc_train_ids = set(_hc_global.iloc[_tr_idx]['uid'].tolist())
+_hc_test_ids_all = set(_hc_global.iloc[_te_idx]['uid'].tolist())
 # Filtro de edad: test HC deben solapar con el rango etario del grupo clínico
 _hc_test_ids = set(
     _hc_global[
-        _hc_global['subject'].isin(_hc_test_ids_all) &
+        _hc_global['uid'].isin(_hc_test_ids_all) &
         (_hc_global['age'] >= _mci_age_min)
-    ]['subject'].tolist()
+    ]['uid'].tolist()
 )
 
 print(f"Split global HC: {len(_hc_train_ids)} train | "
