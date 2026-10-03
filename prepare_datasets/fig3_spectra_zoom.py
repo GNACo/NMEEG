@@ -17,16 +17,24 @@ from matplotlib.lines import Line2D
 import numpy as np
 import pandas as pd
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from run_config_params.paths import FOOOF_DB, IAF_ROIS_DIR, BLR_DIR, FIGURES_DIR
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 DATA_PATH = (
-    r"D:\MulticentersEEG\Features_2_normativeModel\gamma_40\24_BEST_EPOCHS"
-    r"\AIF_Babiloni\filtered_IAFs_fooof_database.feather"
+    FOOOF_DB
+)
+# ROI-aggregated, QC'd cohort (TF/IAFp + FOOOF R^2 exclusions already applied)
+# that feeds the demographic table and the BLR/classification pipeline. The
+# raw per-electrode DATA_PATH file above is pre-QC and has a few extra HC
+# subjects (e.g. invalid TF/IAFp landmarks) that never entered any other
+# analysis -- restrict to this cohort so Fig. 3's n matches everywhere else.
+QC_COHORT_PATH = (
+    os.path.join(IAF_ROIS_DIR, "rois_age.feather")
 )
 _DEFAULT_SAVE = (
-    r"D:\MulticentersEEG\Features_2_normativeModel\gamma_40\24_BEST_EPOCHS"
-    r"\AIF_Babiloni\results_harmonize\recombat\BLR_paper\bands_age\harmonized"
-    r"\figures_paper"
+    FIGURES_DIR
 )
 SAVE_PATH = os.environ.get("NMEEG_FIGURES_PATH", _DEFAULT_SAVE)
 
@@ -66,6 +74,16 @@ plt.rcParams.update({
 df = pd.read_feather(DATA_PATH)
 df["group"] = df["group"].replace(GROUP_MAPPING)
 df = df[df["group"].isin(GROUP_ORDER)].copy()
+# Greece contributes only 3 subjects total (2 HC, 1 AD) -- excluded study-wide.
+df = df[df["SITE"] != "Greece"].copy()
+df["uid"] = df["subject"].astype(str) + "||" + df["SITE"].astype(str)
+
+_qc = pd.read_feather(QC_COHORT_PATH)
+_qc_renombrar = {"G2": "HC", "GU": "HC", "CTR": "HC", "DCL": "MCI", "A": "AD", "DTA": "AD"}
+_qc["group"] = _qc["group"].replace(_qc_renombrar)
+_qc_uids = set(_qc["subject"].astype(str) + "||" + _qc["SITE"].astype(str))
+df = df[df["uid"].isin(_qc_uids)].copy()
+
 df["subject_site"] = df["subject"].astype(str) + "_" + df["SITE"].astype(str)
 
 

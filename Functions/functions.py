@@ -730,7 +730,9 @@ def harmonize_transform(data, selected_cols = list, electrode='O1', exclude_cols
         if covars[cov].dtype == 'object':
             le = LabelEncoder()
             covars[cov] = le.fit_transform(covars[cov]).astype('float64')
-    i
+    if method == 'neuroharmonize':
+        model, data_adj = harmonizationLearn(my_data, covars, smooth_terms=smooth_terms, eb=True)
+        harmonized_data = pd.DataFrame(data_adj, columns=final_cols)
     elif method == 'recombat':
         print(covars)
         model = reComBat(parametric=True,    # use parametric or non-parametric empirical Bayes method. 
@@ -759,9 +761,7 @@ def harmonize_transform(data, selected_cols = list, electrode='O1', exclude_cols
         )
         X_harmonized = model.fit_transform(data.loc[:, final_cols], covars.SITE, X=covars.drop('SITE', axis=1)) # Ojo covars no tiene el sitio, asumo que el segundo parametro de la función es suficiente
         harmonized_data = pd.DataFrame(X_harmonized, columns=final_cols)
-    # Renombrar columnas armonizadas con prefijo 'harm_f method == 'neuroharmonize':
-        model, data_adj = harmonizationLearn(my_data, covars, smooth_terms=smooth_terms, eb=True)
-        harmonized_data = pd.DataFrame(data_adj, columns=final_cols)'
+    # Renombrar columnas armonizadas con prefijo 'harm_'
     harmonized_data.columns = [f'harm_{col}' for col in harmonized_data.columns]
     return model, harmonized_data
 
