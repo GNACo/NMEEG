@@ -1,0 +1,14 @@
+# Harmonization environment (ReComBat). The reCombat library requires Python < 3.10
+# (see harmonize/recombat.py). Versions below are NOT pinned yet: pin them from the
+# environment used to produce the harmonized files before publishing a final lock.
+reCombat
+neuroCombat
+neuroHarmonize
+umap-learn
+xicorpy
+xlsxwriter
+numpy
+pandas
+scikit-learn
+openpyxl
+pyarrow
