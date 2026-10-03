@@ -2,29 +2,24 @@
 % Required packages (add to preamble):
 %   \usepackage{booktabs}
 %   \usepackage[table]{xcolor}   % for \rowcolor
-%   \usepackage{multirow}
 % ─────────────────────────────────────────────────────────────────────────────
 
 \begin{table*}[ht]
 \centering
 \caption{%
-  Binary classification performance using EEG z-score deviations from the
-  normative model as features.
-  Results obtained via stratified 5-fold cross-validation with in-fold random
-  under-sampling to address class imbalance, and 100-iteration bootstrap
-  out-of-bag (OOB) resampling for AUC stability estimation.
-  Healthy controls (HC) were partitioned into a single global 80/20 train–test
-  split (stratified by age), ensuring the same $n = 133$ held-out subjects
-  served as the reference class across all features. Oscillatory relative
-  power is a bounded proportion in (0,1); the normative model was fit on the
-  logit-transformed feature and predictions/$z$-scores were computed in that
-  space (see Methods), which keeps all predicted centiles within the valid
-  range.
-  Features: oscillatory relative spectral power (specparam decomposition)
-  across 7 frequency bands $\times$ 5 scalp ROIs
-  (Frontal, Central, Parietal, Occipital, Parieto-Occipital).
-  \textbf{Bold}: best result per metric within each comparison group.
-  Shaded rows indicate the best overall classifier per comparison (highest CV AUC).%
+  Binary classification performance using EEG $z$-score deviations from the
+  normative model as features (all 7 bands $\times$ 5 ROIs and the aperiodic
+  exponent, jointly).
+  Stratified 5-fold cross-validation with in-fold random under-sampling of the
+  majority class, and 50-iteration bootstrap out-of-bag (OOB) resampling for AUC
+  stability. Healthy controls (HC) served as the reference class from a single
+  global 80/20 train--test split (stratified by age); $n = 133$ held-out HC
+  were used in all comparisons. Site harmonization was learned on training HC
+  only (neuroHarmonize, ComBat-GAM with smooth age). Oscillatory relative power
+  is bounded in $(0,1)$; the normative model was fit on the logit scale and
+  $z$-scores were computed in that space.
+  \textbf{Bold}: best result per metric within each comparison.
+  Shaded rows indicate the best classifier per comparison (highest CV AUC).%
 }
 \label{tab:classification_results}
 \setlength{\tabcolsep}{7pt}
@@ -36,66 +31,66 @@
   & \textbf{Accuracy}
   & \textbf{F1}
   & \textbf{Brier}
-  & \textbf{Boot AUC} (mean $\pm$ SD) \\
+  & \textbf{Boot AUC} (mean $\pm$ SD) \
 \midrule
 
 %% ── HC vs MCI ─────────────────────────────────────────────────────────────
 \multicolumn{6}{@{}l}{%
   \textit{HC vs MCI}\enspace
-  \small($n_\text{HC} = 133$,\; $n_\text{MCI} = 341$)} \\[3pt]
-SVM
-  & $0.735 \pm 0.093$ & 0.701 & 0.664 & 0.205
-  & $0.736 \pm 0.041$ \\
-Logistic Regression
-  & $0.747 \pm 0.104$ & $\mathbf{0.707}$ & $\mathbf{0.666}$ & $\mathbf{0.196}$
-  & $\mathbf{0.750 \pm 0.036}$ \\
+  \small($n_\text{HC} = 133$,\; $n_\text{MCI} = 341$)} \[3pt]
 \rowcolor{gray!12}
+SVM
+  & $\mathbf{0.715 \pm 0.068}$ & $\mathbf{0.663}$ & $\mathbf{0.630}$ & $\mathbf{0.218}$
+  & $\mathbf{0.700 \pm 0.037}$ \
+Logistic Regression
+  & $0.705 \pm 0.087$ & 0.652 & 0.618 & 0.220
+  & $0.692 \pm 0.037$ \
 Random Forest
-  & $\mathbf{0.750 \pm 0.041}$ & 0.684 & 0.649 & 0.204
-  & $0.726 \pm 0.037$ \\
+  & $0.610 \pm 0.073$ & 0.570 & 0.533 & 0.239
+  & $0.624 \pm 0.045$ \
 Decision Tree
-  & $0.616 \pm 0.040$ & 0.629 & 0.592 & 0.371
-  & $0.599 \pm 0.048$ \\
+  & $0.506 \pm 0.035$ & 0.511 & 0.482 & 0.489
+  & $0.550 \pm 0.043$ \
 
 \midrule
 
 %% ── HC vs AD ──────────────────────────────────────────────────────────────
 \multicolumn{6}{@{}l}{%
   \textit{HC vs AD}\enspace
-  \small($n_\text{HC} = 133$,\; $n_\text{AD} = 129$)} \\[3pt]
-SVM
-  & $0.823 \pm 0.042$ & $\mathbf{0.771}$ & $\mathbf{0.769}$ & 0.178
-  & $0.781 \pm 0.038$ \\
-Logistic Regression
-  & $0.829 \pm 0.044$ & 0.751 & 0.751 & $\mathbf{0.172}$
-  & $\mathbf{0.791 \pm 0.039}$ \\
+  \small($n_\text{HC} = 133$,\; $n_\text{AD} = 129$)} \[3pt]
 \rowcolor{gray!12}
+SVM
+  & $\mathbf{0.774 \pm 0.097}$ & $\mathbf{0.695}$ & $\mathbf{0.692}$ & $\mathbf{0.199}$
+  & $0.726 \pm 0.047$ \
+Logistic Regression
+  & $0.762 \pm 0.093$ & 0.691 & 0.687 & 0.203
+  & $\mathbf{0.731 \pm 0.048}$ \
 Random Forest
-  & $\mathbf{0.830 \pm 0.030}$ & 0.756 & 0.755 & 0.176
-  & $0.784 \pm 0.043$ \\
+  & $0.716 \pm 0.017$ & 0.664 & 0.662 & 0.215
+  & $0.682 \pm 0.051$ \
 Decision Tree
-  & $0.646 \pm 0.060$ & 0.646 & 0.639 & 0.354
-  & $0.643 \pm 0.046$ \\
+  & $0.607 \pm 0.028$ & 0.607 & 0.605 & 0.393
+  & $0.566 \pm 0.044$ \
 
 \midrule
 
 %% ── HC vs ACr ─────────────────────────────────────────────────────────────
 \multicolumn{6}{@{}l}{%
   \textit{HC vs ACr (\textit{PSEN1} E280A)}\enspace
-  \small($n_\text{HC} = 133$,\; $n_\text{ACr} = 39$)} \\[3pt]
+  \small($n_\text{HC} = 133$,\; $n_\text{ACr} = 39$)} \[3pt]
 SVM
-  & $0.688 \pm 0.107$ & 0.645 & 0.596 & 0.217
-  & $0.751 \pm 0.066$ \\
-Logistic Regression
-  & $0.737 \pm 0.094$ & $\mathbf{0.703}$ & $\mathbf{0.649}$ & 0.223
-  & $0.777 \pm 0.060$ \\
+  & $0.773 \pm 0.113$ & $\mathbf{0.721}$ & $\mathbf{0.669}$ & 0.208
+  & $0.768 \pm 0.069$ \
 \rowcolor{gray!12}
+Logistic Regression
+  & $\mathbf{0.792 \pm 0.094}$ & 0.704 & 0.660 & $\mathbf{0.202}$
+  & $\mathbf{0.783 \pm 0.069}$ \
 Random Forest
-  & $\mathbf{0.749 \pm 0.115}$ & 0.669 & 0.623 & $\mathbf{0.204}$
-  & $\mathbf{0.780 \pm 0.051}$ \\
+  & $0.747 \pm 0.144$ & 0.640 & 0.604 & 0.215
+  & $0.744 \pm 0.070$ \
 Decision Tree
-  & $0.648 \pm 0.082$ & 0.663 & 0.596 & 0.337
-  & $0.624 \pm 0.077$ \\
+  & $0.581 \pm 0.074$ & 0.576 & 0.532 & 0.424
+  & $0.592 \pm 0.073$ \
 
 \bottomrule
 \end{tabular}
@@ -104,7 +99,7 @@ Decision Tree
 \textbf{Abbreviations:}
 AUC: area under the ROC curve;
 Brier: probabilistic calibration loss (lower is better);
-Boot AUC: out-of-bag AUC across 100 bootstrap iterations;
+Boot AUC: out-of-bag AUC across 50 bootstrap iterations;
 F1: macro-averaged F1 score;
 SVM: calibrated linear support vector machine (Platt scaling);
 HC: healthy controls (global held-out 20\% test split);

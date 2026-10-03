@@ -4,7 +4,7 @@ import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit
 from models.BLR import BayesianLinearRegression
 from models.model_metrics import compute_MSLL, explained_var
-from run_config_params.paths import BLR_DIR, FEATURES_OSC_DIR
+from run_config_params.paths import BLR_DIR, HARM_OUT_DIR, HARM_SUFFIX
 from scipy.stats import spearmanr
 from scipy.special import expit, logit as logit_fn
 from sklearn.preprocessing import OneHotEncoder
@@ -588,7 +588,7 @@ save_path = BLR_DIR
 # Se carga la primera familia para obtener los sujetos HC y su rango de edad MCI.
 _first_family   = 'osc_pw_rel_canonic'
 _file_name_ref  = f'{_first_family}_roi'
-_base_feat_path = FEATURES_OSC_DIR
+_base_feat_path = HARM_OUT_DIR
 
 # Greece contributes only 3 subjects total (2 HC, 1 AD) across the whole
 # pooled dataset -- too small a cohort for a credible site-level correction
@@ -597,7 +597,7 @@ EXCLUDED_SITES = ['Greece']
 
 _hc_records = []
 for _roi in rois:
-    _p = os.path.join(_base_feat_path, f"{_file_name_ref}{_roi}_SITE_age_group_recombat.xlsx")
+    _p = os.path.join(_base_feat_path, f"{_file_name_ref}{_roi}_SITE_age_group_{HARM_SUFFIX}.xlsx")
     _d = pd.read_excel(_p, sheet_name="harmonizeSITE_age_group")
     _d = _d[~_d['SITE'].isin(EXCLUDED_SITES)]
     _hc_records.append(_d[_d['group'] == 'HC'][['subject', 'SITE', 'age']].dropna())
@@ -611,7 +611,7 @@ _hc_global['uid'] = _hc_global['subject'].astype(str) + '||' + _hc_global['SITE'
 _hc_global = _hc_global.drop_duplicates(subset='uid').reset_index(drop=True)
 
 # Rango de edad del MCI (Seoul + Madrid) para filtrar el test set
-_p_ref = os.path.join(_base_feat_path, f"{_file_name_ref}{rois[0]}_SITE_age_group_recombat.xlsx")
+_p_ref = os.path.join(_base_feat_path, f"{_file_name_ref}{rois[0]}_SITE_age_group_{HARM_SUFFIX}.xlsx")
 _d_ref = pd.read_excel(_p_ref, sheet_name="harmonizeSITE_age_group")
 _mci_ages = _d_ref[(_d_ref['group'] == 'MCI') & (_d_ref['SITE'].isin(['Seoul', 'Spain']))]['age'].dropna()
 _mci_age_min = float(_mci_ages.min()) - 5
@@ -642,7 +642,7 @@ for family in ['osc_pw_rel_canonic','osc_pw_ab_canonic']: # ['osc_pw_rel_canonic
         non_band_features = ['IAFp']
     file_name = f'{family}_roi'
     for roi in rois:
-        path = os.path.join(FEATURES_OSC_DIR, f"{file_name}{roi}_SITE_age_group_recombat.xlsx")
+        path = os.path.join(HARM_OUT_DIR, f"{file_name}{roi}_SITE_age_group_{HARM_SUFFIX}.xlsx")
         data_roi = pd.read_excel(path, sheet_name="harmonizeSITE_age_group")
         data_roi = data_roi[~data_roi['SITE'].isin(EXCLUDED_SITES)].copy()
         #harmonize
@@ -666,16 +666,17 @@ for family in ['osc_pw_rel_canonic','osc_pw_ab_canonic']: # ['osc_pw_rel_canonic
             # downstream classification AUC. Reverted to the original
             # linear-scale IQR, which has no evidence against it.
             is_hc = (data_roi['group'] == 'HC')
+            is_hc_train = is_hc & (data_roi['subject'].astype(str) + '||' + data_roi['SITE'].astype(str)).isin(_hc_train_ids)
             total_hc = data_roi[is_hc][feature].notna().sum()
-            hc_values = data_roi.loc[is_hc, feature].dropna()
+            # Outlier bounds come from HC training rows only; test and clinical rows are never filtered
+            hc_values = data_roi.loc[is_hc_train, feature].dropna()
             q1 = hc_values.quantile(0.25)
             q3 = hc_values.quantile(0.75)
             iqr_val = q3 - q1
             lower = q1 - 1.5 * iqr_val
             upper = q3 + 1.5 * iqr_val
-            keep_hc = data_roi[feature].between(lower, upper)
-            keep_mci = data_roi['group'] != 'HC'
-            data_filtered = data_roi[keep_hc | keep_mci].copy()
+            keep = (~is_hc_train) | data_roi[feature].between(lower, upper)
+            data_filtered = data_roi[keep].copy()
             remaining_hc = data_filtered[(data_filtered['group'] == 'HC') & (data_filtered[feature].notna())].shape[0]
             n_removed = total_hc - remaining_hc
 
@@ -714,20 +715,19 @@ for family in ['osc_pw_rel_canonic','osc_pw_ab_canonic']: # ['osc_pw_rel_canonic
 
             # Sujetos HC originales
             is_hc = (data_roi['group'] == 'HC')
+            is_hc_train = is_hc & (data_roi['subject'].astype(str) + '||' + data_roi['SITE'].astype(str)).isin(_hc_train_ids)
             total_hc = data_roi[is_hc][feature].notna().sum()
 
-            # Cálculo de IQR para el filtro
-            hc_values = data_roi.loc[is_hc, feature].dropna()
+            # IQR bounds from HC training rows only (see band loop)
+            hc_values = data_roi.loc[is_hc_train, feature].dropna()
             q1 = hc_values.quantile(0.25)
             q3 = hc_values.quantile(0.75)
             iqr_val = q3 - q1
             lower = q1 - 1.5 * iqr_val
             upper = q3 + 1.5 * iqr_val
 
-            # Index para mantener
-            keep_hc = data_roi[feature].between(lower, upper)
-            keep_mci = data_roi['group'] != 'HC'
-            data_filtered = data_roi[keep_hc | keep_mci].copy()
+            keep = (~is_hc_train) | data_roi[feature].between(lower, upper)
+            data_filtered = data_roi[keep].copy()
 
             # Sujetos HC luego del filtro
             remaining_hc = data_filtered[(data_filtered['group'] == 'HC') & (data_filtered[feature].notna())].shape[0]

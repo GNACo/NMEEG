@@ -272,20 +272,18 @@ def classify_zscore_all_features(df_all_combined, sets_incluidos=['test', 'mci']
         + df_z['roi'].astype(str)
     )
 
+    # Index by (subject, Site): subject codes are reused across sites and are not unique
     df_pivot = (
-        df_z[['subject', 'group', 'feat_col', 'z_score']]
-        .pivot_table(index=['subject', 'group'], columns='feat_col', values='z_score')
+        df_z[['subject', 'Site', 'group', 'feat_col', 'z_score']]
+        .pivot_table(index=['subject', 'Site', 'group'], columns='feat_col', values='z_score')
         .reset_index()
     )
     df_pivot.columns.name = None
 
-    feat_cols = [c for c in df_pivot.columns if c not in ('subject', 'group')]
+    feat_cols = [c for c in df_pivot.columns if c not in ('subject', 'Site', 'group')]
 
-    # Mantener sujetos con ≥50% features; imputar resto con mediana de columna
-    min_features = int(np.ceil(len(feat_cols) * 0.5))
-    df_pivot = df_pivot[df_pivot[feat_cols].notna().sum(axis=1) >= min_features].copy()
-    col_medians = df_pivot[feat_cols].median()
-    df_pivot[feat_cols] = df_pivot[feat_cols].fillna(col_medians)
+    # Complete cases only: no imputation, so no group receives artificial median z-scores
+    df_pivot = df_pivot.dropna(subset=feat_cols).copy()
 
     class_counts_original = df_pivot['group'].value_counts().to_dict()
     unique_classes = df_pivot['group'].unique()
@@ -364,48 +362,45 @@ def classify_zscore_all_features(df_all_combined, sets_incluidos=['test', 'mci']
 # =============================================================================
 # Configuration
 # =============================================================================
-save_path = BLR_DIR
-families = ['osc_pw_rel_canonic', 'osc_pw_ab_canonic']
-rois = ['F', 'C', 'P', 'O', 'PO']
+if __name__ == "__main__":
+    save_path = BLR_DIR
+    families = ['osc_pw_rel_canonic', 'osc_pw_ab_canonic']
+    rois = ['F', 'C', 'P', 'O', 'PO']
 
-comparison_sets = {
-    "MCI": ['test', 'mci'],
-    "AD":  ['test', 'AD'],
-    "PD":  ['test', 'PD'],
-    "VD":  ['test', 'VD'],
-    "ACr": ['test', 'ACr'],
-    "ALL": ['test', 'ALL'],
-    "ND":  ['test', 'ND'],
-}
+    comparison_sets = {
+        "MCI": ['test', 'mci'],
+        "AD":  ['test', 'AD'],
+        "ACr": ['test', 'ACr'],
+    }
 
-# =============================================================================
-# Main loop
-# =============================================================================
-for family in families:
-    csv_path = os.path.join(save_path, f"blr_{family}.csv")
-    print(f"\nLoading {csv_path}")
-    df_all_combined = pd.read_csv(csv_path)
+    # =============================================================================
+    # Main loop
+    # =============================================================================
+    for family in families:
+        csv_path = os.path.join(save_path, f"blr_{family}.csv")
+        print(f"\nLoading {csv_path}")
+        df_all_combined = pd.read_csv(csv_path)
 
-    # Per-ROI (one z_score at a time)
-    for label, sets in comparison_sets.items():
-        ml = classify_zscore_models(df_all_combined, sets_incluidos=sets, n_bootstrap=0)
-        ml.to_csv(os.path.join(save_path, f"SVM_{family}_{label}.csv"), index=False)
-        if not ml.empty:
-            print(f"  {label}: best AUC = {ml.AUC_mean.max():.3f}  "
-                  f"brier = {ml.loc[ml.AUC_mean.idxmax(), 'brier']:.3f}")
+        # Per-ROI (one z_score at a time)
+        for label, sets in comparison_sets.items():
+            ml = classify_zscore_models(df_all_combined, sets_incluidos=sets, n_bootstrap=0)
+            ml.to_csv(os.path.join(save_path, f"SVM_{family}_{label}.csv"), index=False)
+            if not ml.empty:
+                print(f"  {label}: best AUC = {ml.AUC_mean.max():.3f}  "
+                      f"brier = {ml.loc[ml.AUC_mean.idxmax(), 'brier']:.3f}")
 
-    # All features combined
-    for label, sets in comparison_sets.items():
-        ml_all, imp_all = classify_zscore_all_features(df_all_combined, sets_incluidos=sets, n_bootstrap=50)
-        ml_all.to_csv(os.path.join(save_path, f"SVM_allFeatures_{family}_{label}.csv"), index=False)
-        imp_all.to_csv(os.path.join(save_path, f"feature_importance_{family}_{label}.csv"), index=False)
-        if not ml_all.empty:
-            best_row = ml_all.loc[ml_all.AUC_mean.idxmax()]
-            boot_str = (f"  boot={best_row['boot_AUC_mean']:.3f}±{best_row['boot_AUC_std']:.3f}"
-                        if 'boot_AUC_mean' in best_row else "")
-            print(f"  AllFeatures {label}: AUC={best_row['AUC_mean']:.3f}±{best_row['AUC_std']:.3f}"
-                  f"  brier={best_row['brier']:.3f}{boot_str}")
+        # All features combined
+        for label, sets in comparison_sets.items():
+            ml_all, imp_all = classify_zscore_all_features(df_all_combined, sets_incluidos=sets, n_bootstrap=50)
+            ml_all.to_csv(os.path.join(save_path, f"SVM_allFeatures_{family}_{label}.csv"), index=False)
+            imp_all.to_csv(os.path.join(save_path, f"feature_importance_{family}_{label}.csv"), index=False)
+            if not ml_all.empty:
+                best_row = ml_all.loc[ml_all.AUC_mean.idxmax()]
+                boot_str = (f"  boot={best_row['boot_AUC_mean']:.3f}±{best_row['boot_AUC_std']:.3f}"
+                            if 'boot_AUC_mean' in best_row else "")
+                print(f"  AllFeatures {label}: AUC={best_row['AUC_mean']:.3f}±{best_row['AUC_std']:.3f}"
+                      f"  brier={best_row['brier']:.3f}{boot_str}")
 
-# cross validation solo training 
-# estandarización solo sobre el conjunto de training
-# no hacer inputación 
+    # cross validation solo training 
+    # estandarización solo sobre el conjunto de training
+    # no hacer inputación 

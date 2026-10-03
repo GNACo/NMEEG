@@ -15,3 +15,7 @@ RECOMBAT_DIR = os.path.join(RESULTS_ROOT, "results_harmonize", "recombat")
 FEATURES_OSC_DIR = os.path.join(RECOMBAT_DIR, "features_osc", "age_group")
 BLR_DIR = os.path.join(RECOMBAT_DIR, "BLR_paper", "bands_age", "harmonized")
 FIGURES_DIR = os.path.join(BLR_DIR, "figures_paper")
+
+# Primary harmonization: neuroHarmonize (ComBat-GAM, learned on training HC only)
+HARM_SUFFIX = "neuroharmonize"
+HARM_OUT_DIR = os.path.join(RECOMBAT_DIR, "features_osc_neuroharmonize", "age_group")
