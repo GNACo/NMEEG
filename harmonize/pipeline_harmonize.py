@@ -9,6 +9,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from Functions.functions import apply_pca_umap, harmonize_transform
+from run_config_params.paths import RESULTS_ROOT
 
 def extract_family_features(data):
     family_features ={
@@ -31,7 +32,7 @@ def extract_family_features(data):
     }
     return family_features
 
-directory = r'D:\MulticentersEEG\Features_2_normativeModel\gamma_40\24_BEST_EPOCHS\AIF_Babiloni'
+directory = RESULTS_ROOT
 
 aproach1_age = pd.read_feather(rf'{directory}\IAF_FOOOF_ALL_SENSORS\IAF_FOOOF_age.feather')
 renombrar_grupos = {'G2': 'HC', 'GU': 'HC', 'CTR': 'HC', 'DCL': 'MCI','A':'AD','DTA':'AD'}

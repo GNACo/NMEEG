@@ -16,17 +16,16 @@ from matplotlib.lines import Line2D
 import numpy as np
 import pandas as pd
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from run_config_params.paths import BLR_DIR, FIGURES_DIR
 
 # ── CONFIG ────────────────────────────────────────────────────────────────────
 DATA_PATH = (
-    r"D:\MulticentersEEG\Features_2_normativeModel\gamma_40\24_BEST_EPOCHS"
-    r"\AIF_Babiloni\results_harmonize\recombat\BLR_paper\bands_age\harmonized"
-    r"\blr_osc_pw_rel_canonic.csv"
+    os.path.join(BLR_DIR, "blr_osc_pw_rel_canonic.csv")
 )
 _DEFAULT_SAVE = (
-    r"D:\MulticentersEEG\Features_2_normativeModel\gamma_40\24_BEST_EPOCHS"
-    r"\AIF_Babiloni\results_harmonize\recombat\BLR_paper\bands_age\harmonized"
-    r"\figures_paper"
+    FIGURES_DIR
 )
 SAVE_PATH = os.environ.get("NMEEG_FIGURES_PATH", _DEFAULT_SAVE)
 

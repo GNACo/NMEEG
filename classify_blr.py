@@ -1,4 +1,5 @@
 import os
+from run_config_params.paths import BLR_DIR
 import numpy as np
 import pandas as pd
 from sklearn.utils import resample
@@ -363,7 +364,7 @@ def classify_zscore_all_features(df_all_combined, sets_incluidos=['test', 'mci']
 # =============================================================================
 # Configuration
 # =============================================================================
-save_path = r"D:\MulticentersEEG\Features_2_normativeModel\gamma_40\24_BEST_EPOCHS\AIF_Babiloni\results_harmonize\recombat\BLR_paper\bands_age\harmonized"
+save_path = BLR_DIR
 families = ['osc_pw_rel_canonic', 'osc_pw_ab_canonic']
 rois = ['F', 'C', 'P', 'O', 'PO']
 

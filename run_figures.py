@@ -29,6 +29,7 @@ Demographic figure is in prepare_datasets/graphs_demographic.ipynb
 """
 
 import os
+from run_config_params.paths import FIGURES_DIR
 import subprocess
 import sys
 import time
@@ -38,9 +39,7 @@ ROOT = Path(__file__).parent
 
 # ── OUTPUT FOLDER — change this line to redirect all figures ──────────────────
 FIGURES_PATH = (
-    r"D:\MulticentersEEG\Features_2_normativeModel\gamma_40\24_BEST_EPOCHS"
-    r"\AIF_Babiloni\results_harmonize\recombat\BLR_paper\bands_age\harmonized"
-    r"\figures_paper"
+    FIGURES_DIR
 )
 
 SCRIPTS = [

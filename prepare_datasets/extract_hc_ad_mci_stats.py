@@ -13,15 +13,16 @@ next to the source data, plus printed to stdout.
 """
 
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from run_config_params.paths import BLR_DIR
 import numpy as np
 import pandas as pd
 from scipy import stats
 from statsmodels.stats.multitest import multipletests
 
 DATA_PATH = (
-    r"D:\MulticentersEEG\Features_2_normativeModel\gamma_40\24_BEST_EPOCHS"
-    r"\AIF_Babiloni\results_harmonize\recombat\BLR_paper\bands_age\harmonized"
-    r"\blr_osc_pw_rel_canonic.csv"
+    os.path.join(BLR_DIR, "blr_osc_pw_rel_canonic.csv")
 )
 OUT_DIR = os.path.dirname(DATA_PATH)
 
