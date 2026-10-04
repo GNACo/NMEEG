@@ -610,7 +610,7 @@ _hc_global = pd.concat(_hc_records).reset_index(drop=True)
 _hc_global['uid'] = _hc_global['subject'].astype(str) + '||' + _hc_global['SITE'].astype(str)
 _hc_global = _hc_global.drop_duplicates(subset='uid').reset_index(drop=True)
 
-# Rango de edad del MCI (Seoul + Madrid) para filtrar el test set
+# Rango de edad del MCI (Seoul + Spain) para filtrar el test set
 _p_ref = os.path.join(_base_feat_path, f"{_file_name_ref}{rois[0]}_SITE_age_group_{HARM_SUFFIX}.xlsx")
 _d_ref = pd.read_excel(_p_ref, sheet_name="harmonizeSITE_age_group")
 _mci_ages = _d_ref[(_d_ref['group'] == 'MCI') & (_d_ref['SITE'].isin(['Seoul', 'Spain']))]['age'].dropna()

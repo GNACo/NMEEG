@@ -53,6 +53,23 @@ ROI_LABELS = {
 
 # ── LOAD DATA ─────────────────────────────────────────────────────────────────
 df_metrics = pd.read_csv(METRICS_PATH)
+
+
+def bh_adjust(p):
+    """Benjamini-Hochberg adjusted p-values (q-values)."""
+    p = np.asarray(p, dtype=float)
+    m = len(p)
+    order = np.argsort(p)
+    ranked = p[order] * m / np.arange(1, m + 1)
+    q = np.minimum.accumulate(ranked[::-1])[::-1]
+    out = np.empty(m)
+    out[order] = np.minimum(q, 1.0)
+    return out
+
+
+# Correction across ALL Spearman tests run in testblr.py (35 band x ROI cells plus
+# the exponent in 5 ROIs = 40), not only the 35 cells drawn in the heatmap.
+df_metrics["q_test"] = bh_adjust(df_metrics["pvalue_test"].values)
 df_metrics = df_metrics[df_metrics["band"].isin(BANDS)].copy()
 
 df_results = pd.read_csv(RESULTS_PATH)
@@ -74,7 +91,7 @@ for i, band in enumerate(BANDS):
         if len(row) == 1:
             msll_mat[i, j] = row["msll_test"].values[0]
             rho_mat[i, j]  = row["rho_test"].values[0]
-            pval_mat[i, j] = row["pvalue_test"].values[0]
+            pval_mat[i, j] = row["q_test"].values[0]
 
 def sig_stars(p):
     if p < 0.001: return "***"
@@ -180,7 +197,7 @@ cb_B = fig.colorbar(im_B, ax=ax_B, fraction=0.046, pad=0.03, shrink=0.82)
 cb_B.ax.tick_params(labelsize=7.5)
 
 ax_B.text(0.5, -0.12,
-          "* p < 0.05     ** p < 0.01     *** p < 0.001",
+          "* q < 0.05     ** q < 0.01     *** q < 0.001  (Benjamini-Hochberg, 40 tests)",
           transform=ax_B.transAxes, ha="center", va="top",
           fontsize=8, color="#555555", style="italic")
 

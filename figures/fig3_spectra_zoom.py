@@ -83,6 +83,11 @@ _qc_renombrar = {"G2": "HC", "GU": "HC", "CTR": "HC", "DCL": "MCI", "A": "AD", "
 _qc["group"] = _qc["group"].replace(_qc_renombrar)
 _qc_uids = set(_qc["subject"].astype(str) + "||" + _qc["SITE"].astype(str))
 df = df[df["uid"].isin(_qc_uids)].copy()
+# MCI restricted to the sub-cohorts analysed in testblr.py (Seoul + Spain, n=341).
+# The 8 MCI from Medellin are in the QC cohort but not in the normative or
+# classification analyses, so they are left out here for consistency.
+MCI_SITES = ["Seoul", "Spain"]
+df = df[(df["group"] != "MCI") | df["SITE"].isin(MCI_SITES)].copy()
 
 df["subject_site"] = df["subject"].astype(str) + "_" + df["SITE"].astype(str)
 
