@@ -23,7 +23,7 @@ Fig 3  fig3_spectra_zoom.py
        3 panels: Unadjusted | Oscillatory Fit | Aperiodic, with
        zoomed call-outs on the theta/alpha peak and the 27-40 Hz tail.
 
-Demographic figure is in prepare_datasets/graphs_demographic.ipynb
+Demographic figure is in figures/graphs_demographic.ipynb
 (run separately in Jupyter).
 -----------------------------------------------------------------
 """
@@ -44,13 +44,13 @@ FIGURES_PATH = (
 
 SCRIPTS = [
     ("Results figure (a: curves | b: heatmaps | c: profiles)",
-     ROOT / "prepare_datasets" / "fig_results.py"),
+     ROOT / "figures" / "fig_results.py"),
 
     ("Fig 2 — BLR model performance & calibration",
-     ROOT / "prepare_datasets" / "blr_performance_figure.py"),
+     ROOT / "figures" / "blr_performance_figure.py"),
 
     ("Fig 3 — Group spectra with zoom call-outs",
-     ROOT / "prepare_datasets" / "fig3_spectra_zoom.py"),
+     ROOT / "figures" / "fig3_spectra_zoom.py"),
 ]
 
 SEP = "-" * 68

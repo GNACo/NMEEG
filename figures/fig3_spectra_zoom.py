@@ -3,7 +3,7 @@ Fig 3 — Group-average spectra (Unadjusted | Oscillatory Fit | Aperiodic) with
 two zoomed call-outs on the Unadjusted Spectra panel (theta/alpha peak region
 and the high-frequency 27-40 Hz tail, where ACr separates from the rest).
 
-Variation on the spectra row of prepare_datasets/graphs_manuscript.ipynb
+Variation on the spectra row of figures/graphs_manuscript.ipynb
 (cell 1e7ba578): same data, same group colours, same electrodes-of-interest
 averaging — but only the 3 spectra panels (no violin plots), plus zoom insets.
 """

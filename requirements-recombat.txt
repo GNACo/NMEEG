@@ -1,0 +1,5 @@
+# ReComBat sensitivity analysis only (harmonize/pipeline_harmonize.py, Functions/functions.py).
+# The reCombat library requires Python < 3.10, so install it in a separate environment.
+# Not needed for the primary results.
+reCombat
+-r requirements-harmonize.txt

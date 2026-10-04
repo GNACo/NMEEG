@@ -1,6 +1,6 @@
 """
 Extract HC / MCI / AD group z-score deviation stats — same methodology as
-prepare_datasets/fig_results.py (panel b), but for the HC, MCI, AD groups
+figures/fig_results.py (panel b), but for the HC, MCI, AD groups
 requested by the user (ACr excluded).
 
 Method (identical to fig_results.py):

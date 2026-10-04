@@ -12,3 +12,6 @@ Nothing here is deleted: every file was moved with `git mv`, so its history is p
 - `superseded_scripts/` — earlier runners and alternative models superseded by
   `testblr.py` / `classify_blr.py` (`run_BLR.py`, `GPR.py`, `hbr_model.py`, `aproach.py`,
   and auxiliary analyses not used in the manuscript).
+
+Paths inside archived files (for example `prepare_datasets/...`) refer to the repository
+layout at the time they were archived. They are kept as they were and are not updated.
