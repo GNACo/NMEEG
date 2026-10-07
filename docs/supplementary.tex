@@ -1,0 +1,341 @@
+% Supplementary Material - compile this file on its own
+% (Overleaf: Menu > Main document > supplementary.tex, then switch back)
+\documentclass[11pt]{article}
+\usepackage[margin=2cm]{geometry}
+\usepackage[backend=biber, style=numeric, sorting=none]{biblatex}
+\addbibresource{sample.bib}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{pdflscape}
+\usepackage{array}
+\usepackage[table]{xcolor}
+\usepackage[hidelinks]{hyperref}
+
+\renewcommand{\thetable}{S\arabic{table}}
+\renewcommand{\thefigure}{S\arabic{figure}}
+\renewcommand{\thesection}{S\arabic{section}}
+% Items still to be confirmed by the authors are shown in red; remove before submission
+\newcommand{\pend}[1]{\textcolor{red}{[#1]}}
+
+\title{Supplementary Material\\[4pt]
+\large Normative Low-Density EEG Models for the Alzheimer's Disease Continuum: From MCI to Presymptomatic \textit{PSEN1} E280A Carriers}
+\author{Luisa Zapata Saldarriaga \textit{et al.}}
+\date{}
+
+\begin{document}
+\maketitle
+
+\section{Description of the datasets}
+
+\subsection{Overview and inclusion criteria}
+
+Resting-state EEG data were pooled from eleven cohorts recorded in ten countries (Argentina, Chile, Colombia, Cuba, Germany, Greece, Norway, Poland, South Korea and Spain). Colombia contributed two independent cohorts recorded in Medell\'in, one with a high-density system (Medellin\_hd) and one with a portable low-density system (Medellin\_ld). Seven datasets are publicly available (OpenNeuro, Synapse or upon request to the original authors), and four are institutional datasets of the participating groups. All cohorts were approved by their local ethics committees, and all participants provided written informed consent in accordance with the Declaration of Helsinki.
+
+Datasets were included if they provided (i) eyes-closed resting-state EEG with at least three minutes of recording, (ii) the eight electrodes common to all cohorts (Fp1, Fp2, C3, C4, P7, P8, O1, O2, or their equivalents), and (iii) age and diagnostic group for each participant. When a protocol contained several sessions or conditions, only one eyes-closed recording per participant was used: the first visit (Medellin\_hd), session $t1$ (Oslo), the pre-battery recording (Dortmund), the first eyes-closed block (Spain), and the concatenated eyes-closed events (Seoul). After preprocessing, the 24 best 5-s epochs (120~s) were retained for every participant, so the analyzed signal length was identical across cohorts regardless of the original recording duration.
+
+Table~\ref{tab:acquisition} summarizes the acquisition parameters of each cohort and the number of participants per diagnostic group entering the pooled dataset.
+
+\begin{landscape}
+\begin{table}[p]
+\centering
+\caption{Acquisition characteristics and number of participants per diagnostic group in each cohort of the pooled dataset (after preprocessing and quality control). HC: healthy controls; MCI: mild cognitive impairment; AD: Alzheimer's disease; ACr: asymptomatic \textit{PSEN1} E280A carriers; Ch.: number of scalp electrodes in the original montage; $f_s$: original sampling rate; LP/HP: low-/high-pass; CMS/DRL: BioSemi common-mode sense / driven right leg.}
+\label{tab:acquisition}
+\scriptsize
+\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabularx}{\linewidth}{@{}l l >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X r l r >{\raggedright\arraybackslash}X r r r r@{}}
+\toprule
+\textbf{Cohort} & \textbf{Country} & \textbf{Source (accession)} & \textbf{EEG system} & \textbf{Ch.} & \textbf{Reference} & \textbf{$f_s$ (Hz)} & \textbf{Online filters} & \textbf{HC} & \textbf{MCI} & \textbf{AD} & \textbf{ACr} \\
+\midrule
+Argentina & Argentina & BrainLat, CNC-UdeSA \cite{Prado2023} (Synapse syn51549340) & BioSemi ActiveTwo & 128 & Linked mastoids & 512 & Analog 0.03--100 Hz & 18 & -- & -- & -- \\
+Chile & Chile & BrainLat, CICA \cite{Prado2023} (Synapse syn51549340) & BioSemi ActiveTwo & 128 & Linked mastoids & 512 & Analog 0.03--100 Hz & 13 & -- & -- & -- \\
+Cuba & Cuba & CHBMP \cite{ValdesSosa2021} (Synapse syn22283677) & MEDICID 5 & 64/128 & Linked earlobes & 200 & 0.5--50 Hz; 60 Hz notch & 228 & -- & -- & -- \\
+Dortmund & Germany & Dortmund Vital Study \cite{Getzmann2024} (OpenNeuro ds005385) & BrainAmp DC & 64 & FCz & 1000 & LP 250 Hz; no HP & 332 & -- & -- & -- \\
+Greece$^{a}$ & Greece & AHEPA \cite{Miltiadous2023} (OpenNeuro ds004504) & Nihon Kohden EEG 2100 & 19 & A1--A2 & 500 & LP 70 Hz; TC 0.3 s & 2 & -- & 1 & -- \\
+Medellin\_hd & Colombia & Institutional (GNA/GRUNECO) & Neuroscan & 58 & Right earlobe & 1000 & 0.05--200 Hz; 60 Hz notch & 48 & 6$^{b}$ & 3 & 17 \\
+Medellin\_ld & Colombia & Institutional (GNA/GRUNECO) & OpenBCI Cyton (portable) & 8 & Linked mastoids & 250 & None (analog anti-aliasing only) & 46 & 2$^{b}$ & -- & 22 \\
+Oslo & Norway & SRM \cite{HatlestadHall2022} (OpenNeuro ds003775) & BioSemi ActiveTwo & 64 & CMS/DRL & 1024 & None (anti-aliasing, 204.8 Hz) & 93 & -- & -- & -- \\
+Poland & Poland & PEARL-Neuro \cite{Dzianok2024} (OpenNeuro ds004796) & Brain Products actiCHamp & 128 & FCz & 1000 & LP 280 Hz; no HP/notch & 50 & -- & -- & -- \\
+Seoul & South Korea & CAUEEG \cite{KimCAUEEG2023} (on request) & Comet AS40 (Grass Telefactor) & 19 & Linked earlobes & 200 & 0.5--70 Hz & 349 & 314 & 126 & -- \\
+Spain & Spain & MUSCA-OO, C3N-UCM (institutional) & eego mylab & 64 & FCz & 2000 & LP $\approx$520 Hz & 17 & 27 & -- & -- \\
+\midrule
+\textbf{Total} & & & & & & & & \textbf{1196} & \textbf{349} & \textbf{130} & \textbf{39} \\
+\bottomrule
+\end{tabularx}
+
+\vspace{4pt}
+\raggedright\scriptsize
+$^{a}$ Excluded from all analyses because too few participants remained after quality control to support a reliable site-level correction.\\
+$^{b}$ Excluded from the normative-modeling and classification analyses, as they belong to the \textit{PSEN1} E280A kindred (see main text, Methods).
+\end{table}
+\end{landscape}
+
+\subsection{Cohort-specific notes}
+
+\paragraph{Medellin\_ld (portable low-density).}
+Institutional cohort of the Grupo de Neurociencias de Antioquia (GNA) and the Grupo de Neuropsicolog\'ia y Conducta (GRUNECO), recorded within project PRG 2022-53407 (CODI, Universidad de Antioquia). It is the only cohort acquired natively with a low-density montage: a wireless OpenBCI Cyton board (Texas Instruments ADS1299 front-end) with eight cup electrodes at Fp1, Fp2, C3, C4, P7, P8, O1 and O2, linked-mastoid reference, impedances below 25~k$\Omega$, and a 5-min eyes-closed recording.
+
+\paragraph{Medellin\_hd (high-density).}
+Institutional longitudinal cohort of GNA/GRUNECO following individuals across the AD continuum, including carriers of the \textit{PSEN1} E280A mutation (Minciencias project 111577757635). Only the first of four planned visits was used. EEG was recorded with a 58-channel Neuroscan system (right-earlobe reference, ground between Cz and Fz).
+
+\paragraph{Seoul (CAUEEG).}
+Clinical EEG recordings from Chung-Ang University Hospital acquired between 2012 and 2020 \cite{KimCAUEEG2023}. Because the protocol includes several events, the eyes-closed resting segments were concatenated. The montage follows the original 10--20 nomenclature; electrodes T5 and T6 were treated as P7 and P8, following the standardized 10--10 nomenclature of the American Clinical Neurophysiology Society \cite{Acharya2016}. Only participants labeled as MCI, AD dementia, or normal cognition were included. \pend{Confirm that only AD-type dementia was retained (excluding vascular and other dementias).}
+
+\paragraph{Argentina and Chile (BrainLat).}
+Healthy controls from the multimodal dataset of the Latin American Brain Health Institute (BrainLat) \cite{Prado2023}, recorded with the same 128-channel BioSemi setup at both centers. At CICA (Chile), 13 of the 27 available recordings had complete metadata and were included.
+
+\paragraph{Spain (MUSCA-OO).}
+Institutional cohort of the Center for Cognitive and Computational Neuroscience (C3N), Universidad Complutense de Madrid (project PID2022-141524NA-I00), including healthy older adults and individuals with MCI. Only the first 5-min eyes-closed block of the protocol was used.
+
+\paragraph{Other healthy-control cohorts.}
+Cuba (CHBMP) is a population-based sample of young and middle-aged adults \cite{ValdesSosa2021}; Dortmund (Dortmund Vital Study) covers the adult lifespan, and only the recording made before the cognitive test battery was used \cite{Getzmann2024}; Oslo (SRM) includes healthy adults from session $t1$ \cite{HatlestadHall2022}; and Poland (PEARL-Neuro) includes cognitively healthy middle-aged adults (50--63 years) \cite{Dzianok2024}.
+
+\subsection{Clinical classification}
+
+Diagnostic labels were taken from each original cohort. \pend{Specify MCI criteria (e.g., Petersen/NIA-AA) and AD criteria (e.g., NIA-AA 2011) for Seoul, Spain and Medell\'in.} Asymptomatic carriers (ACr) were members of the Antioquia kindred, genotyped as carriers of the \textit{PSEN1} E280A mutation and cognitively unimpaired at the time of recording \pend{state the cognitive criterion, e.g., MMSE cut-off or neuropsychological assessment}. Healthy controls had no history of neurological or psychiatric disorders according to each cohort's protocol.
+
+\subsection{Channel selection and signal standardization}
+
+All datasets were converted to BIDS and resampled to 200~Hz, and the eight electrodes common to all cohorts were retained. For high-density recordings, bad channels were interpolated before channel subsampling. \pend{State the reference used for analysis (original reference of each cohort or common re-referencing) and how it was handled across cohorts.}
+
+\section{Sample flow and quality control}
+
+Table~\ref{tab:flow} reports the number of participants excluded at each processing step, by cohort.
+
+\begin{table}[ht]
+\centering
+\caption{Participants excluded at each processing step, by cohort.}
+\label{tab:flow}
+\pend{Table: recorded $\rightarrow$ fewer than 24 clean epochs $\rightarrow$ TF/IAFp criterion $\rightarrow$ FOOOF $R^2<0.9$ $\rightarrow$ analyzed, per cohort and group}
+\end{table}
+
+\section{Normative model performance}
+
+Table~\ref{tab:norm_msll} reports the mean standardized log loss (MSLL) and the explained variance (EV) on the held-out HC test set ($n=133$) for each oscillatory band and ROI, and for the aperiodic exponent. Negative MSLL values indicate that the model outperforms a trivial baseline. Table~\ref{tab:norm_rho} reports Spearman's $\rho$ between observed and predicted values in the same set, with $p$-values adjusted for the 40 tests by the Benjamini--Hochberg procedure ($q$). Stars indicate $q<0.05$ (*) and $q<0.01$ (**).
+
+\begin{table}[ht]
+\centering
+\caption{Normative model performance on the held-out HC test set: MSLL / explained variance (EV) for each band and ROI. Oscillatory bands are modeled on the logit scale; the exponent on its original scale.}
+\label{tab:norm_msll}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Feature & Frontal & Central & Parietal & Occipital & Parieto-occipital \
+\midrule
+Theta & -0.070 / 0.042 & -0.071 / 0.032 & -0.136 / 0.109 & -0.149 / 0.113 & -0.113 / 0.088 \\
+Alpha 1 & -0.008 / 0.004 & -0.022 / -0.012 & -0.009 / -0.005 & -0.007 / -0.004 & -0.012 / -0.008 \\
+Alpha 2 & -0.015 / 0.035 & -0.044 / 0.016 & -0.028 / 0.034 & -0.036 / 0.034 & -0.036 / 0.037 \\
+Beta 1 & -0.002 / -0.023 & -0.080 / 0.000 & -0.034 / -0.005 & -0.038 / -0.009 & -0.040 / -0.016 \\
+Beta 2 & -0.009 / 0.011 & -0.036 / -0.008 & -0.029 / 0.027 & -0.031 / 0.023 & -0.018 / 0.005 \\
+Beta 3 & -0.008 / 0.001 & -0.026 / -0.002 & -0.011 / 0.008 & -0.025 / 0.003 & -0.022 / 0.004 \\
+Gamma & 0.035 / -0.023 & 0.002 / -0.005 & -0.001 / 0.000 & -0.022 / 0.006 & 0.003 / -0.004 \\
+Exponent & -0.019 / -0.010 & -0.027 / 0.012 & -0.020 / 0.005 & -0.025 / 0.009 & -0.030 / 0.007 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Spearman's $\rho$ between observed and predicted values on the held-out HC test set, with Benjamini--Hochberg adjusted $q$-values in parentheses (40 tests).}
+\label{tab:norm_rho}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Feature & Frontal & Central & Parietal & Occipital & Parieto-occipital \
+\midrule
+Theta & 0.19 (0.15) & 0.24 (0.06) & 0.35 (0.00) & 0.34 (0.00) & 0.30 (0.01) \\
+Alpha 1 & 0.01 (0.99) & -0.02 (0.99) & 0.02 (0.99) & 0.00 (0.99) & -0.00 (0.99) \\
+Alpha 2 & 0.14 (0.28) & 0.08 (0.76) & 0.19 (0.15) & 0.20 (0.15) & 0.17 (0.19) \\
+Beta 1 & 0.05 (0.98) & 0.05 (0.99) & -0.03 (0.99) & -0.02 (0.99) & -0.01 (0.99) \\
+Beta 2 & 0.15 (0.27) & -0.00 (0.99) & 0.17 (0.19) & 0.16 (0.23) & 0.01 (0.99) \\
+Beta 3 & 0.02 (0.99) & -0.07 (0.89) & 0.12 (0.42) & 0.04 (0.99) & 0.03 (0.99) \\
+Gamma & 0.04 (0.99) & 0.02 (0.99) & 0.01 (0.99) & 0.05 (0.98) & 0.00 (0.99) \\
+Exponent & -0.08 (0.80) & 0.21 (0.11) & 0.12 (0.39) & 0.13 (0.38) & 0.14 (0.28) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Sensitivity analyses}
+
+\subsection{Sensitivity analysis: age-matched reference for ACr}
+ACr participants are aged 20--45 years, whereas the held-out HC reference is aged 47--84 years. To check whether this age difference affects the classification, ACr was compared with the healthy controls within the age range of ACr (20--45 years; $n=482$). Out-of-fold $z$-scores were used for all HC, so each HC participant was scored by a model that did not include them. Table~\ref{tab:age_matched} reports the cross-validated AUC of the three main classifiers with the 40 features.
+
+\begin{table}[ht]
+\centering
+\caption{ACr versus healthy controls with the full HC reference and with an age-matched reference. Cross-validated AUC (mean $\pm$ SD), 40 features, 5-fold stratified cross-validation, 50 bootstrap iterations.}
+\label{tab:age_matched}
+\small
+\begin{tabular}{@{}llrrccc@{}}
+\toprule
+Comparison & HC reference & $n_\text{HC}$ & $n_\text{ACr}$ & SVM & Logistic regression & Random forest \
+\midrule
+ACr & All HC (out-of-fold) & 1194 & 39 & 0.717 $\pm$ 0.099 & 0.757 $\pm$ 0.056 & 0.741 $\pm$ 0.042 \\
+ACr & HC aged 20--45 y & 482 & 39 & 0.764 $\pm$ 0.074 & 0.786 $\pm$ 0.072 & 0.736 $\pm$ 0.056 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Restricting the reference to the age range of ACr did not reduce discrimination: the AUC was 0.76 for SVM and 0.79 for logistic regression, compared with 0.72 and 0.76 with the full HC reference. The difference is smaller than one standard deviation, so age does not explain the separation between ACr and HC.
+
+\subsection{Site-restricted analyses}
+To assess whether the results depend on the largest cohort, each comparison was repeated within a single site and with Seoul excluded. Seoul contributes 349 HC, 314 MCI and 126 AD participants. Spain is the only other site with MCI participants (17 HC, 27 MCI), and all ACr participants come from Medell\'in (94 HC, 39 ACr). AD could only be analyzed within Seoul, since no other site has enough AD participants. As in the main analysis, the 8 MCI participants from Medell\'in are excluded. The HC reference is the out-of-fold HC pool restricted to the same site, or to all sites except Seoul.
+
+\begin{table}[ht]
+\centering
+\caption{Cross-validated AUC (mean $\pm$ SD) for HC versus each clinical group, restricted to the sites indicated. 40 features, 5-fold stratified cross-validation, 50 bootstrap iterations.}
+\label{tab:site}
+\small
+\begin{tabular}{@{}llrrccc@{}}
+\toprule
+Clinical group & HC reference & $n_\text{HC}$ & $n_\text{clinical}$ & SVM & Logistic regression & Random forest \
+\midrule
+MCI (Seoul+Spain) & All sites & 1194 & 341 & 0.729 $\pm$ 0.040 & 0.718 $\pm$ 0.036 & 0.748 $\pm$ 0.036 \\
+MCI (Seoul) & Seoul only & 349 & 314 & 0.691 $\pm$ 0.040 & 0.676 $\pm$ 0.043 & 0.633 $\pm$ 0.077 \\
+MCI (Spain) & Spain only & 17 & 27 & 0.470 $\pm$ 0.278 & 0.502 $\pm$ 0.299 & 0.536 $\pm$ 0.268 \\
+MCI (Spain) & Excluding Seoul & 845 & 27 & 0.835 $\pm$ 0.127 & 0.850 $\pm$ 0.110 & 0.854 $\pm$ 0.059 \\
+AD (all) & All sites & 1194 & 129 & 0.725 $\pm$ 0.026 & 0.728 $\pm$ 0.021 & 0.742 $\pm$ 0.037 \\
+AD (Seoul) & Seoul only & 349 & 126 & 0.777 $\pm$ 0.029 & 0.769 $\pm$ 0.029 & 0.709 $\pm$ 0.060 \\
+ACr (all) & All sites & 1194 & 39 & 0.717 $\pm$ 0.099 & 0.757 $\pm$ 0.056 & 0.741 $\pm$ 0.042 \\
+ACr (Medell'in) & Medell'in only & 94 & 39 & 0.684 $\pm$ 0.085 & 0.734 $\pm$ 0.098 & 0.674 $\pm$ 0.061 \\
+ACr (all) & Excluding Seoul & 845 & 39 & 0.759 $\pm$ 0.071 & 0.785 $\pm$ 0.075 & 0.778 $\pm$ 0.036 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Within Seoul, the MCI and AD comparisons gave AUCs of the same magnitude as the all-site analysis (MCI 0.63--0.69 versus 0.72--0.75; AD 0.71--0.78 versus 0.73--0.74), with standard deviations of 0.03--0.08. Within Medell\'in, ACr gave lower AUCs than the all-site reference (0.67--0.73 versus 0.72--0.76), with the same direction of effect; this comparison has fewer HC (94) and the differences are within one standard deviation. Taken together, these results do not indicate that the main findings depend on Seoul, although the within-site samples have limited power.
+
+The comparisons that exclude Seoul are not free of site confounding and should not be read as independent replications. In that comparison the MCI group comes from Spain and the ACr group from Medell\'in, whereas the HC reference comes from the other sites. The high AUC for MCI (0.84--0.85 with 27 MCI) is likely driven by these between-site differences: in the Spain-only analysis, which removes them, the AUC is close to chance (0.47--0.54) with SDs of 0.27--0.30. For this reason the excluding-Seoul MCI estimate is reported for completeness only and is not used as evidence of robustness.
+
+\subsection{Absolute oscillatory power}
+Because oscillatory relative power is compositional, the normative analysis was repeated on absolute oscillatory power, with the same pipeline, features and held-out HC set, without the logit transform. Table~\ref{tab:ab_msll} reports MSLL and explained variance (EV), and Table~\ref{tab:ab_rho} reports Spearman's $\rho$ with Benjamini--Hochberg adjusted $q$-values (40 tests). Absolute power fitted the normative model less well than relative power: 13 of 40 absolute features had MSLL $>0$, worse than the trivial baseline, compared with 3 of 40 relative features. The largest values were for Gamma in the Parietal and Occipital ROIs (MSLL 0.63 and 0.72). Table~\ref{tab:ab_cls} compares the classification with relative and absolute power. The results were not consistent across classifiers: for ACr, the random forest reached an AUC of 0.89, whereas the SVM and logistic regression reached 0.58 and 0.68. With 39 ACr participants and this disagreement between classifiers, we do not interpret these results as support for absolute power.
+
+\begin{table}[ht]
+\centering
+\caption{Normative model performance with absolute oscillatory power on the held-out HC test set: MSLL / explained variance (EV) for each band and ROI.}
+\label{tab:ab_msll}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Feature & Frontal & Central & Parietal & Occipital & Parieto-occipital \
+\midrule
+Theta & -0.068 / 0.009 & -0.014 / 0.006 & -0.096 / 0.049 & -0.092 / 0.031 & -0.077 / 0.038 \\
+Alpha 1 & 0.007 / -0.000 & 0.021 / -0.004 & 0.013 / 0.005 & 0.007 / 0.010 & 0.006 / 0.004 \\
+Alpha 2 & -0.008 / 0.012 & -0.001 / 0.010 & 0.193 / 0.024 & 0.149 / 0.023 & 0.089 / 0.022 \\
+Beta 1 & 0.456 / -0.013 & -0.008 / -0.016 & -0.026 / -0.007 & -0.013 / -0.007 & -0.003 / -0.018 \\
+Beta 2 & -0.029 / 0.012 & -0.030 / -0.019 & -0.017 / 0.030 & -0.013 / 0.021 & -0.021 / 0.008 \\
+Beta 3 & -0.003 / -0.003 & -0.041 / -0.013 & -0.040 / 0.013 & -0.042 / 0.022 & -0.048 / 0.004 \\
+Gamma & -0.010 / -0.004 & 0.113 / -0.012 & 0.633 / -0.003 & 0.715 / -0.006 & 0.077 / -0.016 \\
+Exponent & -0.018 / -0.008 & -0.027 / 0.013 & -0.019 / 0.005 & -0.024 / 0.011 & -0.029 / 0.007 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Spearman's $\rho$ with absolute oscillatory power on the held-out HC test set, with Benjamini--Hochberg adjusted $q$-values in parentheses (40 tests).}
+\label{tab:ab_rho}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Feature & Frontal & Central & Parietal & Occipital & Parieto-occipital \
+\midrule
+Theta & 0.19 (0.10) & 0.23 (0.06) & 0.32 (0.01) & 0.28 (0.01) & 0.30 (0.01) \\
+Alpha 1 & 0.06 (0.64) & -0.03 (0.83) & 0.01 (0.91) & 0.05 (0.73) & 0.01 (0.91) \\
+Alpha 2 & 0.07 (0.59) & 0.05 (0.70) & 0.19 (0.10) & 0.19 (0.10) & 0.17 (0.16) \\
+Beta 1 & 0.13 (0.32) & 0.06 (0.64) & -0.03 (0.83) & -0.04 (0.80) & -0.01 (0.91) \\
+Beta 2 & 0.15 (0.20) & -0.06 (0.64) & 0.22 (0.06) & 0.19 (0.10) & 0.08 (0.58) \\
+Beta 3 & 0.06 (0.64) & -0.11 (0.36) & 0.12 (0.32) & 0.15 (0.23) & -0.01 (0.92) \\
+Gamma & -0.22 (0.06) & -0.08 (0.58) & 0.22 (0.06) & 0.09 (0.52) & -0.12 (0.33) \\
+Exponent & -0.08 (0.56) & 0.21 (0.08) & 0.13 (0.32) & 0.14 (0.28) & 0.17 (0.16) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Cross-validated AUC (mean $\pm$ SD) of the classifiers with all features, for relative and absolute oscillatory power. 5-fold stratified cross-validation, 50 bootstrap iterations.}
+\label{tab:ab_cls}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Comparison & SVM & Logistic regression & Random forest \
+\midrule
+Relative, HC vs MCI & 0.715 $\pm$ 0.068 & 0.705 $\pm$ 0.087 & 0.610 $\pm$ 0.073 \\
+Absolute, HC vs MCI & 0.696 $\pm$ 0.047 & 0.697 $\pm$ 0.069 & 0.704 $\pm$ 0.024 \\
+\midrule
+Relative, HC vs AD & 0.774 $\pm$ 0.097 & 0.762 $\pm$ 0.093 & 0.716 $\pm$ 0.017 \\
+Absolute, HC vs AD & 0.777 $\pm$ 0.091 & 0.764 $\pm$ 0.085 & 0.822 $\pm$ 0.048 \\
+\midrule
+Relative, HC vs ACr & 0.773 $\pm$ 0.113 & 0.792 $\pm$ 0.094 & 0.747 $\pm$ 0.144 \\
+Absolute, HC vs ACr & 0.579 $\pm$ 0.058 & 0.682 $\pm$ 0.132 & 0.891 $\pm$ 0.051 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Univariate classification}
+Tables~\ref{tab:uni_mci}--\ref{tab:uni_acr} report the cross-validated AUC of the linear SVM for each band and ROI $z$-score considered alone, for HC versus MCI, AD and ACr (133 held-out HC). The strongest single features were theta in the frontal, central, parietal and parieto-occipital regions for MCI (AUC 0.59--0.62), theta and beta3 for AD (AUC 0.64--0.67), and beta1 in parietal, occipital and parieto-occipital regions together with gamma in the central region for ACr (AUC 0.70--0.73). Single features performed modestly. AUCs above 0.5 were found in 24/35 features for MCI, 31/35 for AD and 29/35 for ACr; values below 0.5 indicate the reverse direction. These 35 tests per comparison were not corrected for multiple comparisons and are reported descriptively.
+
+\begin{table}[ht]
+\centering
+\caption{Univariate classification, HC versus MCI: cross-validated AUC of the SVM for each band and ROI $z$-score.}
+\label{tab:uni_mci}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Band & Frontal & Central & Parietal & Occipital & Parieto-occipital \
+\midrule
+Theta & 0.62 & 0.61 & 0.59 & 0.58 & 0.60 \\
+Alpha 1 & 0.47 & 0.46 & 0.56 & 0.54 & 0.53 \\
+Alpha 2 & 0.45 & 0.56 & 0.47 & 0.52 & 0.48 \\
+Beta 1 & 0.48 & 0.48 & 0.53 & 0.58 & 0.47 \\
+Beta 2 & 0.47 & 0.58 & 0.56 & 0.54 & 0.57 \\
+Beta 3 & 0.49 & 0.57 & 0.51 & 0.50 & 0.48 \\
+Gamma & 0.56 & 0.52 & 0.57 & 0.55 & 0.55 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Univariate classification, HC versus AD: cross-validated AUC of the SVM for each band and ROI $z$-score.}
+\label{tab:uni_ad}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Band & Frontal & Central & Parietal & Occipital & Parieto-occipital \
+\midrule
+Theta & 0.64 & 0.67 & 0.64 & 0.61 & 0.64 \\
+Alpha 1 & 0.44 & 0.55 & 0.56 & 0.43 & 0.43 \\
+Alpha 2 & 0.58 & 0.52 & 0.54 & 0.55 & 0.56 \\
+Beta 1 & 0.56 & 0.55 & 0.53 & 0.48 & 0.54 \\
+Beta 2 & 0.58 & 0.62 & 0.63 & 0.62 & 0.64 \\
+Beta 3 & 0.59 & 0.66 & 0.53 & 0.60 & 0.61 \\
+Gamma & 0.54 & 0.55 & 0.61 & 0.52 & 0.56 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[ht]
+\centering
+\caption{Univariate classification, HC versus ACr: cross-validated AUC of the SVM for each band and ROI $z$-score.}
+\label{tab:uni_acr}
+\small
+\begin{tabular}{@{}lccccc@{}}
+\toprule
+Band & Frontal & Central & Parietal & Occipital & Parieto-occipital \
+\midrule
+Theta & 0.54 & 0.52 & 0.45 & 0.62 & 0.51 \\
+Alpha 1 & 0.54 & 0.59 & 0.61 & 0.59 & 0.59 \\
+Alpha 2 & 0.52 & 0.52 & 0.52 & 0.52 & 0.53 \\
+Beta 1 & 0.43 & 0.55 & 0.70 & 0.72 & 0.70 \\
+Beta 2 & 0.48 & 0.53 & 0.43 & 0.47 & 0.49 \\
+Beta 3 & 0.56 & 0.60 & 0.61 & 0.64 & 0.63 \\
+Gamma & 0.62 & 0.71 & 0.68 & 0.66 & 0.69 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\printbibliography
+
+\end{document}
