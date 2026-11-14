@@ -86,8 +86,8 @@ df = df[df["uid"].isin(_qc_uids)].copy()
 # MCI restricted to the sub-cohorts analysed in testblr.py (Seoul + Spain, n=341).
 # The 8 MCI from Medellin are in the QC cohort but not in the normative or
 # classification analyses, so they are left out here for consistency.
-MCI_SITES = ["Seoul", "Spain"]
-df = df[(df["group"] != "MCI") | df["SITE"].isin(MCI_SITES)].copy()
+from run_config_params.sample import analysis_sample
+df = analysis_sample(df)  # sin MCI/AD del kindred PSEN1 de Medellín
 
 df["subject_site"] = df["subject"].astype(str) + "_" + df["SITE"].astype(str)
 

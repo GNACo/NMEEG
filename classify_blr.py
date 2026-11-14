@@ -159,7 +159,7 @@ def bootstrap_stability(scores, labels, n_classes, n_splits, inner_cv_k, n_boots
         oob_mask[idx_boot] = False
         oob_idx = np.where(oob_mask)[0]
 
-        if oob_idx.sum() < 4 or len(np.unique(labels[oob_idx])) < 2:
+        if len(oob_idx) < 4 or len(np.unique(labels[oob_idx])) < 2:
             continue
 
         X_boot, y_boot = scores[idx_boot], labels[idx_boot]

@@ -126,7 +126,9 @@ class BayesianLinearRegression:
         #Usa la descomposición de Cholesky o métodos iterativos en lugar de calcular C directamente:Esto evita el cálculo explícito de C_inv_y con np.linalg.solve(), reduciendo el uso de memoria.
         n = self.phi.shape[0]  # Number of data points
         # Compute the marginal covariance matrix C
-        C = sigma2 * np.eye(n) + (1.0 / alpha2) * (self.phi @ self.phi.T)
+        # alpha2 is the prior VARIANCE of the weights (fit() uses prior precision 1/alpha2),
+        # so the marginal covariance is sigma2*I + alpha2*Phi*Phi^T.
+        C = sigma2 * np.eye(n) + alpha2 * (self.phi @ self.phi.T)
         
         # Añadir regularización para evitar problemas con matrices mal condicionadas
         epsilon = 1e-6  # Valor pequeño para regularización
@@ -253,7 +255,12 @@ class BayesianLinearRegression:
 
         # Set initial values in log-space (avoid poor initialization)
         init_params = np.log([max(self.sigma2, 1e-5), max(self.alpha2, 1e-5)])
-        bounds =[(np.log(0.1), np.log(5)), (np.log(1), np.log(1000))]
+        # alpha2 lower bound widened from 1 to 1e-4: under the prior-variance
+        # convention above, the unconstrained optimum for most features falls
+        # in 0.008-0.05, so a lower bound of 1 pinned nearly all of them
+        # (verified on the full 40-feature set; see analysis/diagnose_alpha2.py
+        # equivalent check). 1e-4 leaves two orders of magnitude of headroom.
+        bounds = [(np.log(0.1), np.log(5)), (np.log(1e-4), np.log(1000))]
 
         result = minimize(neg_log_marginal_likelihood, init_params, bounds=bounds, method="L-BFGS-B") # "powell"
         if not result.success:

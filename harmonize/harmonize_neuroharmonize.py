@@ -6,6 +6,13 @@ Site harmonization with neuroHarmonize (ComBat-GAM), learn/apply design.
   data and no diagnostic label influence the correction.
 - Covariates: SITE (batch) and age, with age modeled non-linearly (smooth_terms).
 - The learned model is applied to every participant (HC test, MCI, AD, ACr).
+- Oscillatory relative power (family 'osc_pw_rel_canonic', band columns only) is
+  bounded in (0,1) and compositional, so it is harmonized on the logit scale and
+  back-transformed (expit) afterwards. ComBat's empirical-Bayes step assumes
+  approximately normal, homoscedastic residuals per feature; applied directly to
+  a bounded ratio this produced out-of-range corrected values (negative "power").
+  The exponent and offset columns, and the absolute-power family, are not
+  bounded in (0,1) and are harmonized on their original scale, unchanged.
 
 Run with the neuroHarmonize environment (see requirements-harmonize.txt):
     python harmonize/harmonize_neuroharmonize.py
@@ -17,6 +24,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import numpy as np
 import pandas as pd
+from scipy.special import expit, logit
 from sklearn.model_selection import StratifiedShuffleSplit
 from neuroHarmonize import harmonizationLearn, harmonizationApply
 
@@ -26,6 +34,16 @@ ROIS = ["F", "C", "P", "O", "PO"]
 FAMILIES = ["osc_pw_rel_canonic", "osc_pw_ab_canonic"]
 EXCLUDED_SITES = ["Greece"]
 SRC_DIR = os.path.join(RECOMBAT_DIR, "features_osc", "age_group")
+# Same clipping tolerance as testblr.py's LOGIT_EPS, so the two logit steps are consistent.
+LOGIT_EPS = 1e-3
+BAND_PREFIX = "osc_pw_canonic_"  # bounded (0,1) band-power columns within osc_pw_rel_canonic
+
+
+def is_bounded_col(family, col):
+    """True for the band-power columns of the relative-power family, which are
+    bounded in (0,1). The exponent/offset columns (same family) and every column
+    of the absolute-power family are not bounded and are left on their own scale."""
+    return family == "osc_pw_rel_canonic" and col.startswith(BAND_PREFIX)
 
 
 def uid(d):
@@ -60,8 +78,13 @@ def main():
             d = d[~d["SITE"].isin(EXCLUDED_SITES)].reset_index(drop=True)
             feats = [c for c in d.columns if c.endswith(f"_roi{roi}")]
             assert d[feats].notna().all().all(), f"missing values in {family} roi{roi}"
+            bounded_mask = np.array([is_bounded_col(family, f) for f in feats])
 
-            X = d[feats].values.astype(float)
+            X_raw = d[feats].values.astype(float)
+            X = X_raw.copy()
+            if bounded_mask.any():
+                clipped = np.clip(X[:, bounded_mask], LOGIT_EPS, 1 - LOGIT_EPS)
+                X[:, bounded_mask] = logit(clipped)
             covars = d[["SITE", "age"]].copy()
             covars["SITE"] = covars["SITE"].astype(str)
             is_train = (d["group"] == "HC") & uid(d).isin(train_uids)
@@ -72,6 +95,8 @@ def main():
             model, _ = harmonizationLearn(X[is_train.values], covars[is_train.values],
                                           smooth_terms=["age"], eb=True)
             X_h = harmonizationApply(X, covars, model)
+            if bounded_mask.any():
+                X_h[:, bounded_mask] = expit(X_h[:, bounded_mask])
 
             harm = d[["subject", "group", "SITE", "age"]].copy()
             for j, f in enumerate(feats):

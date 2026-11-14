@@ -7,6 +7,7 @@ from models.model_metrics import compute_MSLL, explained_var
 from run_config_params.paths import BLR_DIR, HARM_OUT_DIR, HARM_SUFFIX
 from scipy.stats import spearmanr
 from scipy.special import expit, logit as logit_fn
+from run_config_params.sample import KINDRED_SITES
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.utils import resample
@@ -134,7 +135,9 @@ def compute_BLR_and_save_outputs(df, feature, covset, bases, length_scale, sigma
     ALL = df[df['group'].isin(['AD', 'PD', 'VD', 'MCI'])].copy()  # Todas las patologías
 
     #hc = hc[hc['SITE'].isin(['Seoul']) & (hc['age'] >= 50)]
-    mci = mci[mci['SITE'].isin(['Seoul', 'Spain'])]
+    # MCI y AD del kindred PSEN1 (Medellín) fuera del análisis (run_config_params/sample.py)
+    mci = mci[~mci['SITE'].isin(KINDRED_SITES)]
+    ad = ad[~ad['SITE'].isin(KINDRED_SITES)]
 
     if hc_train_ids is not None and hc_test_ids is not None:
         # Split global: usar IDs pre-computados (mismo conjunto para todos los features)

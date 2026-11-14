@@ -19,6 +19,7 @@ import pandas as pd
 from scipy.stats import gaussian_kde
 
 from run_config_params.paths import IAF_ROIS_DIR, FIGURES_DIR
+from run_config_params.sample import analysis_sample
 
 ROIS_AGE = os.path.join(IAF_ROIS_DIR, "rois_age.feather")
 GROUPS = ["HC", "ACr", "MCI", "AD"]
@@ -29,7 +30,7 @@ EXCLUDED_SITES = ["Greece"]
 SITE_ORDER = {
     "HC": ["Argentina", "Chile", "Cuba", "Dortmund", "Medellin_hd", "Medellin_ld",
            "Oslo", "Poland", "Seoul", "Spain"],
-    "MCI": ["Medellin_hd", "Medellin_ld", "Seoul", "Spain"],
+    "MCI": ["Seoul", "Spain"],
     "ADACR": ["Medellin_hd", "Medellin_ld", "Seoul"],
 }
 SITE_DISPLAY = {"Medellin_hd": "Medellín (hd)", "Medellin_ld": "Medellín (ld)"}
@@ -38,7 +39,8 @@ SITE_DISPLAY = {"Medellin_hd": "Medellín (hd)", "Medellin_ld": "Medellín (ld)"
 def load():
     d = pd.read_feather(ROIS_AGE)
     d["group"] = d["group"].replace(RENAME)
-    d = d[d["group"].isin(GROUPS) & ~d["SITE"].isin(EXCLUDED_SITES)].copy()
+    d = d[d["group"].isin(GROUPS)]
+    d = analysis_sample(d)  # sin Greece ni MCI/AD del kindred PSEN1 (revisión AJJ)
     d["uid"] = d["subject"].astype(str) + "||" + d["SITE"].astype(str)
     return d.drop_duplicates("uid").reset_index(drop=True)
 

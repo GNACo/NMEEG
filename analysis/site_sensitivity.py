@@ -43,6 +43,7 @@ from sklearn.model_selection import StratifiedKFold
 from models.BLR import BayesianLinearRegression
 from classify_blr import classify_zscore_all_features
 from run_config_params.paths import HARM_OUT_DIR, BLR_DIR, HARM_SUFFIX
+from run_config_params.sample import analysis_sample
 
 ROIS = ["F", "C", "P", "O", "PO"]
 BANDS = ["theta", "alpha1", "alpha2", "beta1", "beta2", "beta3", "gamma"]
@@ -78,8 +79,8 @@ def load_roi(roi):
     d = pd.read_excel(path, sheet_name="harmonizeSITE_age_group")
     d = d[~d["SITE"].isin(EXCLUDED_SITES) & d["group"].isin(GROUPS)].copy()
     d["subject"] = d["subject"].astype(str)
-    # MCI: same sub-cohorts as the normative model (testblr.py)
-    d = d[(d["group"] != "MCI") | d["SITE"].isin(MCI_SITES)]
+    # MCI y AD: misma muestra que testblr.py (sin kindred PSEN1 de Medellín)
+    d = analysis_sample(d)
     return d
 
 
