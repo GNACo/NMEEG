@@ -8,7 +8,9 @@ Medellin_hd seguían en el grupo AD. Todos los scripts deben usar esta función.
 """
 import pandas as pd
 
-EXCLUDED_SITES = ["Greece"]
+# Greece ya no se excluye: su tamaño (n=3) era consecuencia del filtro TF/IAFp, que
+# eliminaba al 97% de sus registros. pipeline_v2.py lo desactiva por defecto.
+EXCLUDED_SITES = []
 KINDRED_SITES = ["Medellin_hd", "Medellin_ld"]
 KINDRED_EXCLUDED_GROUPS = ["MCI", "AD"]
 
